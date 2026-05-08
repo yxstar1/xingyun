@@ -10,30 +10,31 @@
             margin: 0; padding: 0; background: #ffffff;
             font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; 
             display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh; color: #000; 
-            overflow-x: hidden; overflow-y: auto; /* 允许滚动，防止按钮看不见 */
+            min-height: 100vh; color: #000; overflow-x: hidden;
         }
 
-        /* 背景层 */
+        /* 1. 背景铺满全屏优化 */
         #dynamic-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-size: contain; background-repeat: no-repeat; background-position: center center;
+            background-size: cover; /* 强制铺满全屏 */
+            background-position: center 20%; /* 自动对齐照片上半部分，保护脸部 */
+            background-repeat: no-repeat;
             z-index: -1; opacity: 1;
             background-image: url('bg1.jpg');
         }
 
         h1 { 
-            margin-top: 25px; font-size: 1.4rem; letter-spacing: 2px; 
+            margin-top: 30px; font-size: 1.5rem; letter-spacing: 2px; 
             color: var(--luhan-gold);
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8); 
             z-index: 10; 
         }
 
         .wheel-container {
-            position: relative; width: 330px; height: 330px; margin-top: 10px;
+            position: relative; width: 330px; height: 330px; margin-top: 15px;
             border: 5px solid var(--luhan-gold); border-radius: 50%;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5); z-index: 10;
-            background: rgba(255,255,255,0.8);
+            box-shadow: 0 0 25px rgba(0,0,0,0.5); z-index: 10;
+            background: rgba(255,255,255,0.85);
         }
         #wheel { width: 100%; height: 100%; border-radius: 50%; transition: transform 5s cubic-bezier(0.15, 0, 0.1, 1); }
         
@@ -50,10 +51,9 @@
             color: #000; font-weight: bold; border: 2px solid #fff; z-index: 21; font-size: 13px;
         }
 
-        /* 按钮容器布局 */
         .controls { 
             display: flex; flex-direction: column; align-items: center; 
-            margin-top: 30px; margin-bottom: 50px; gap: 15px; z-index: 30; 
+            margin-top: 40px; gap: 15px; z-index: 30; 
         }
         
         .spin-btn { 
@@ -62,16 +62,15 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer;
         }
 
-        /* 回顾按钮样式修复 */
         .history-btn { 
-            display: none; /* 初始隐藏 */
+            display: none; 
             padding: 10px 40px; background: rgba(255,255,255,0.9); 
             color: #856404; border: 2px solid var(--luhan-gold); 
             border-radius: 20px; font-size: 0.9rem; font-weight: bold; 
             box-shadow: 0 4px 8px rgba(0,0,0,0.2); cursor: pointer;
         }
 
-        /* 弹出层 */
+        /* 弹出详情页 */
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99; }
         .recipe-card {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -84,10 +83,12 @@
         .recipe-text { font-size: 0.9rem; line-height: 1.7; color: #444; white-space: pre-line; margin-bottom: 12px; }
         
         .btn-group { display: flex; gap: 12px; margin-top: 20px; }
-        .swap-btn { background: #f0f0f0; color: #666; border: none; flex: 1; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 0.9rem; }
-        .confirm-btn { background: linear-gradient(135deg, var(--luhan-gold), #ffa500); color: #000; border: none; flex: 1.4; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 1rem; }
+        .swap-btn { background: #f0f0f0; color: #666; border: none; flex: 1; padding: 14px; border-radius: 10px; font-weight: bold; }
+        .confirm-btn { background: linear-gradient(135deg, var(--luhan-gold), #ffa500); color: #000; border: none; flex: 1.4; padding: 14px; border-radius: 10px; font-weight: bold; }
 
-        .footer { padding: 20px; font-size: 0.75rem; color: #333; font-weight: bold; text-align: center; width: 100%; }
+        /* 文案下移 */
+        .footer { margin-top: auto; padding: 40px 20px 20px 20px; font-size: 0.75rem; color: #333; font-weight: bold; text-align: center; width: 100%; text-shadow: 0 0 5px #fff; }
+        
         .star { position: fixed; top: -5vh; pointer-events: none; color: var(--luhan-gold); z-index: 200; animation: slowFall linear forwards; text-shadow: 0 0 5px #fff; }
         @keyframes slowFall { 0% { transform: translateY(0) rotate(0deg) scale(1.5); opacity: 0; } 10% { opacity: 1; } 100% { transform: translateY(105vh) rotate(720deg) scale(0.5); opacity: 0; } }
         .kid-tag { color: #28a745; font-weight: bold; font-size: 0.75rem; border: 1px solid #28a745; padding: 1px 5px; border-radius: 4px; margin-left: 5px; vertical-align: middle; }
@@ -137,7 +138,7 @@
     let currentBgIdx = 0;
 
     const recipesRaw = [
-        { name: "虾仁滑蛋", isKid: true, ing: "虾仁150g、鸡蛋3个", sauce: "盐2g、胡椒0.5g、淀粉1勺", prep: "虾仁腌5分；蛋液加淀粉盐搅匀", step: "1.炒虾仁变色盛出\n2.倒蛋液微凝入虾仁\n3.推匀25秒流心出锅" },
+        { name: "虾仁滑蛋", isKid: true, ing: "虾仁150g、鸡蛋3个", sauce: "盐2g、白胡椒0.5g、淀粉1勺", prep: "虾仁腌5分；蛋液加水淀粉盐搅匀", step: "1.炒虾仁变色盛出\n2.倒蛋液微凝入虾仁\n3.推匀25秒流心出锅" },
         { name: "可乐鸡翅", isKid: false, ing: "鸡翅8个、可乐330ml", sauce: "生抽2勺、姜4片、盐1g", prep: "切两刀焯水沥干", step: "1.煎至双面金黄\n2.倒可乐生抽焖13分\n3.大火收汁挂浆" },
         { name: "肉末蒸蛋", isKid: true, ing: "鸡蛋2个、肉末60g", sauce: "生抽1勺、香油0.5勺", prep: "蛋水1:1.5过筛；肉末腌5分", step: "1.蛋液蒸10分凝固\n2.炒肉末铺其上\n3.淋油再蒸1分出锅" },
         { name: "小炒黄牛肉", isKid: false, ing: "牛肉200g、椒、芹菜", sauce: "蚝油1.5勺、淀粉腌制", prep: "逆纹切薄片油腌20分", step: "1.猛火滑牛肉35秒出\n2.爆辣合牛肉芹菜\n3.快炒20秒极速出锅" },
@@ -166,7 +167,7 @@
         { name: "土豆泥肉末", isKid: true, ing: "土豆、肉末、酱", sauce: "蚝油、生抽、粉", prep: "蒸泥淋咸鲜肉酱", step: "1.软糯咸香萌娃首选" },
         { name: "彩椒鸡丁", isKid: true, ing: "丁、彩椒、腰果", sauce: "蚝油、生抽、粉", prep: "腌丁炒椒合炒30秒", step: "1.营养均衡五彩缤纷" },
         { name: "肉末茄子", isKid: true, ing: "茄子、肉末、酱", sauce: "糖、生抽、老抽", prep: "蒸茄炒肉合炒收汁", step: "1.撒葱出锅咸甜适中" },
-        { name: "清蒸鱼块", isKid: true, ing: "鱼、姜葱、豉油", sauce: "料酒、热油", prep: "腌制蒸9分淋油激香", step: "1.原汁原味健康生活" }
+        { name: "清蒸鱼块", isKid: true, ing: "鱼、姜葱、豉油", sauce: "料酒、热油", prep: "腌制蒸9分淋油激香", step: "1.原汁原味鲜美健康" }
     ];
 
     function shuffle(arr) {
@@ -179,9 +180,7 @@
     const recipes = shuffle(recipesRaw);
     const count = recipes.length;
     const arc = (Math.PI * 2) / count;
-    let currentRotation = 0;
-    let isSpinning = false;
-    let lastWinnerIdx = -1;
+    let currentRotation = 0, isSpinning = false, lastWinnerIdx = -1;
 
     function draw() {
         ctx.save();
@@ -197,11 +196,9 @@
         ctx.restore();
     }
 
-    // 顺序切换背景
     function changeBg() {
         currentBgIdx = (currentBgIdx + 1) % backgroundList.length;
-        const imgPath = backgroundList[currentBgIdx];
-        document.getElementById('dynamic-bg').style.backgroundImage = `url('${imgPath}')`;
+        document.getElementById('dynamic-bg').style.backgroundImage = `url('${backgroundList[currentBgIdx]}')`;
     }
 
     function startSpin() {
@@ -231,18 +228,19 @@
         document.getElementById('overlay').style.display = 'block';
     }
 
-    // 点击宝贝收到：关键修复逻辑
     function confirmRecipe() {
-        createStars();
-        // 强制显示“回顾”按钮
+        // 1. 瞬发：立刻显示回顾按钮
         const hBtn = document.getElementById('historyBtn');
         hBtn.style.display = "inline-block";
-        hBtn.style.visibility = "visible";
         
+        // 2. 触发特效
+        createStars();
+        
+        // 3. 延迟关闭弹窗
         setTimeout(() => {
             document.getElementById('recipeCard').style.display = 'none';
             document.getElementById('overlay').style.display = 'none';
-        }, 1200);
+        }, 1000);
     }
 
     function reviewLast() { if (lastWinnerIdx !== -1) showRecipe(lastWinnerIdx, false); }
@@ -250,14 +248,14 @@
 
     function createStars() {
         const container = document.getElementById('star-container');
-        for (let i = 0; i < 150; i++) {
+        for (let i = 0; i < 120; i++) {
             const star = document.createElement('div');
             star.className = 'star'; star.innerText = '★';
             star.style.left = Math.random() * 100 + 'vw';
-            star.style.animationDuration = (Math.random() * 4 + 4) + 's';
+            star.style.animationDuration = (Math.random() * 3 + 3) + 's';
             star.style.fontSize = (Math.random() * 18 + 10) + 'px';
             container.appendChild(star);
-            setTimeout(() => { star.remove(); }, 8000);
+            setTimeout(() => { star.remove(); }, 6000);
         }
     }
     draw();
