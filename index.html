@@ -6,77 +6,74 @@
     <title>幸运专属私人食谱库</title>
     <style>
         :root { --gold: #FFD700; --red: #FF4500; }
-        /* 极致性能优化：禁止系统默认高亮 */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            margin: 0; padding: 0; 
-            background: url('bg1.jpg') no-repeat center 20% fixed;
-            background-size: cover;
+            margin: 0; padding: 0; background: #fff;
             font-family: 'PingFang SC', sans-serif; 
             display: flex; flex-direction: column; align-items: center;
             min-height: 100vh; overflow-x: hidden;
         }
 
-        /* 1. 标题位置优化：绝对不被箭头挡住 */
-        h1 { 
-            margin: 0;
-            padding-top: 35px; /* 增加顶部间距 */
-            padding-bottom: 10px;
-            font-size: 1.3rem; 
-            color: var(--gold);
-            text-shadow: 1px 1px 2px #000;
-            z-index: 10;
-            width: 100%;
-            text-align: center;
+        /* 背景：全亮 铺满全屏 固定 */
+        #static-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('bg1.jpg') no-repeat center 15%;
+            background-size: cover; z-index: -1; opacity: 1;
         }
 
-        /* 2. 转盘半透明化 */
-        .wheel-container {
-            position: relative; width: 320px; height: 320px;
-            border: 3px solid rgba(255, 215, 0, 0.5); border-radius: 50%;
+        /* 标题位置优化：极度靠上，避开箭头 */
+        h1 { 
+            margin: 0;
+            padding-top: 50px; 
+            padding-bottom: 5px;
+            font-size: 1.4rem; color: var(--gold);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
             z-index: 10;
+        }
+
+        /* 转盘半透明化：让头像清晰可见 */
+        .wheel-container {
+            position: relative; width: 330px; height: 330px; margin-top: 5px;
+            border: 4px solid rgba(255, 215, 0, 0.4); border-radius: 50%;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3); z-index: 10;
             background: rgba(255, 255, 255, 0.1); 
         }
         #wheel { width: 100%; height: 100%; border-radius: 50%; transition: transform 4s cubic-bezier(0.15, 0, 0.2, 1); }
         
-        /* 箭头指针 */
-        .pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 28px solid var(--red); z-index: 20; }
-        
-        /* 中心按钮 */
-        .center-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 44px; height: 44px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; border: 2px solid #fff; z-index: 21; font-size: 12px; }
+        .pointer { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-top: 32px solid var(--red); z-index: 20; }
+        .center-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 48px; height: 48px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; border: 2.5px solid #fff; z-index: 21; font-size: 13px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
 
         /* 按钮组 */
-        .controls { display: flex; flex-direction: column; align-items: center; margin-top: 20px; gap: 10px; z-index: 30; }
-        .spin-btn { padding: 12px 60px; background: linear-gradient(to right, var(--gold), #ffb800); color: #000; border: none; border-radius: 25px; font-size: 1rem; font-weight: bold; cursor: pointer; }
-        .history-btn { display: none; padding: 8px 40px; background: rgba(255,255,255,0.9); color: #856404; border: 1px solid var(--gold); border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+        .controls { display: flex; flex-direction: column; align-items: center; margin-top: 25px; gap: 12px; z-index: 30; }
+        .spin-btn { padding: 12px 60px; background: linear-gradient(135deg, var(--gold), #ffb800); color: #000; border: none; border-radius: 25px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.5); cursor: pointer; }
+        .history-btn { display: none; padding: 10px 45px; background: rgba(255,255,255,0.9); color: #856404; border: 2px solid var(--gold); border-radius: 20px; font-size: 0.9rem; font-weight: bold; cursor: pointer; }
 
-        /* 食谱详情卡片 */
+        /* 食谱详情卡片：确保容纳超详细内容 */
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 99; }
         .recipe-card {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 90%; max-width: 400px; background: #fff; color: #333;
-            padding: 15px; border-radius: 12px; z-index: 100; max-height: 80vh; overflow-y: auto;
+            width: 92%; max-width: 450px; background: #fff; color: #333;
+            padding: 15px; border-radius: 12px; z-index: 100; max-height: 85vh; overflow-y: auto;
         }
-        .recipe-card h2 { color: #856404; border-bottom: 2px solid var(--gold); padding-bottom: 5px; margin: 0 0 10px 0; font-size: 1.2rem; text-align: center; }
-        .recipe-section { margin-bottom: 10px; background: #fff9eb; padding: 8px; border-radius: 6px; border-left: 3px solid var(--gold); }
-        .section-label { font-weight: bold; color: #d32f2f; font-size: 0.85rem; display: block; margin-bottom: 3px; }
-        .recipe-text { font-size: 0.85rem; line-height: 1.5; color: #444; white-space: pre-line; }
+        .recipe-card h2 { color: #856404; border-bottom: 2.5px solid var(--gold); padding-bottom: 5px; margin: 0 0 10px 0; font-size: 1.3rem; text-align: center; }
+        .recipe-section { margin-bottom: 10px; background: #fff9eb; padding: 10px; border-radius: 8px; border-left: 4px solid var(--gold); }
+        .section-label { font-weight: bold; color: #d32f2f; font-size: 0.9rem; border-bottom: 1px dashed #ccc; display: block; margin-bottom: 4px; }
+        .recipe-text { font-size: 0.88rem; line-height: 1.6; color: #444; white-space: pre-line; }
         
         .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-        .swap-btn { background: #f2f2f2; color: #666; border: none; flex: 1; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 0.85rem; }
-        .confirm-btn { background: var(--gold); color: #000; border: none; flex: 1.5; padding: 12px; border-radius: 8px; font-weight: bold; }
+        .swap-btn { background: #f0f0f0; color: #666; border: none; flex: 1; padding: 14px; border-radius: 10px; font-weight: bold; }
+        .confirm-btn { background: linear-gradient(135deg, var(--gold), #ffa500); color: #000; border: none; flex: 1.5; padding: 14px; border-radius: 10px; font-weight: bold; }
 
-        /* 文案下移 */
-        .footer { margin-top: auto; padding: 20px 0; font-size: 0.7rem; color: #fff; font-weight: bold; text-align: center; width: 100%; text-shadow: 1px 1px 2px #000; }
-        
+        .footer { margin-top: auto; padding: 30px 0; font-size: 0.75rem; color: #fff; font-weight: bold; text-align: center; width: 100%; text-shadow: 1px 1px 3px #000; }
         .star { position: fixed; top: -5vh; pointer-events: none; color: var(--gold); z-index: 200; animation: slowFall linear forwards; }
-        @keyframes slowFall { 0% { transform: translateY(0) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 100% { transform: translateY(105vh) rotate(360deg); opacity: 0; } }
-        .kid-tag { color: #28a745; font-weight: bold; font-size: 0.7rem; border: 1px solid #28a745; padding: 0 3px; border-radius: 3px; margin-left: 3px; }
+        @keyframes slowFall { 0% { transform: translateY(0) rotate(0deg) scale(1.5); opacity: 0; } 10% { opacity: 1; } 100% { transform: translateY(105vh) rotate(720deg) scale(0.5); opacity: 0; } }
+        .kid-tag { color: #28a745; font-weight: bold; font-size: 0.7rem; border: 1px solid #28a745; padding: 0 4px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
     </style>
 </head>
 <body>
 
+<div id="static-bg"></div>
 <div id="star-container"></div>
 <div class="overlay" id="overlay"></div>
 
@@ -84,7 +81,7 @@
     <h2 id="rTitle">菜名</h2>
     <div class="recipe-section"><span class="section-label">🛒 食材清单</span><div class="recipe-text" id="rIng"></div></div>
     <div class="recipe-section"><span class="section-label">🧂 调料精确配比</span><div class="recipe-text" id="rSauce"></div></div>
-    <div class="recipe-section"><span class="section-label">🔪 备菜计时</span><div class="recipe-text" id="rPrep"></div></div>
+    <div class="recipe-section"><span class="section-label">🔪 备菜细节</span><div class="recipe-text" id="rPrep"></div></div>
     <div class="recipe-section"><span class="section-label">🔥 烹饪步骤/计时</span><div class="recipe-text" id="rStep"></div></div>
     <div class="btn-group">
         <button class="swap-btn" id="swapBtn" onclick="swapRecipe()">不想做，换一个</button>
@@ -93,104 +90,271 @@
 </div>
 
 <h1>幸运专属私人食谱库</h1>
-<div class="wheel-container"><div class="pointer"></div><div class="center-btn">LH7</div><canvas id="wheel" width="800" height="800"></canvas></div>
+<div class="wheel-container"><div class="pointer"></div><div class="center-btn">XY7</div><canvas id="wheel" width="800" height="800"></canvas></div>
 <div class="controls">
-    <button class="spin-btn" id="mainSpinBtn" onclick="startSpin()">点击选择</button>
+    <button class="spin-btn" id="mainSpinBtn" onclick="startSpin()">开启选择</button>
     <button class="history-btn" id="historyBtn" onclick="reviewLast()">回顾上次</button>
 </div>
 <div class="footer">Made for You by 你的专属制作员</div>
 
 <script>
     const canvas = document.getElementById('wheel'), ctx = canvas.getContext('2d');
-    let isSpinning = false, lastWinnerIdx = -1, currentDeg = 0;
+    let isSpinning = false, lastWinnerIdx = -1, currentTotalDeg = 0;
 
+    // 补齐30道地狱级详细食谱（严格禁止瓜类）
     const recipesRaw = [
-        { name: "虾仁滑蛋", isKid: true, ing: "虾仁150g,鸡蛋3个,葱1根", sauce: "盐2.5g,胡椒0.5g,生粉5g+水15ml", prep: "虾仁腌10min,蛋液加生粉水打匀", step: "1.大火炒虾45s盛出\n2.倒蛋液中火静置10s\n3.半凝固入虾推铲25s关火" },
-        { name: "可乐鸡翅", isKid: false, ing: "翅中8只,可乐330ml,姜5片", sauce: "生抽30ml,老抽5ml,盐1.5g", prep: "切2刀焯水2min洗净控干", step: "1.中火每面煎4min至金黄\n2.入料焖12.5min\n3.大火猛收3min挂浆" },
-        { name: "酸辣土豆丝", isKid: false, ing: "土豆300g,青椒半个,干椒3个", sauce: "白醋30ml,陈醋15ml,盐3.5g", prep: "切丝洗3次浸10min控干", step: "1.爆香炒丝95s变透\n2.加盐椒淋醋汁\n3.大火翻30s出锅" },
-        { name: "农家小炒肉", isKid: false, ing: "前腿肉250g,螺丝椒4个,豆豉20粒", sauce: "生抽30ml,大蒜5瓣", prep: "椒煸5min虎皮,瘦肉腌5min", step: "1.煸猪油瘦肉变色入蒜椒\n2.淋酱油最大火炒45s" },
-        { name: "红烧排骨", isKid: false, ing: "肋排500g,糖10颗,八角2,姜5", sauce: "生抽30ml,老抽7ml,料酒15ml", prep: "焯3min洗净,熬糖色3.5min", step: "1.排骨挂色入料小火焖45min\n2.大火收汁5.5min至红亮" },
-        { name: "肉末蒸蛋", isKid: true, ing: "鸡蛋2个,猪肉末65g,温水200ml", sauce: "生抽1.5勺,香油15ml,盐1.5g", prep: "蛋水1:1.5过筛,肉腌5min", step: "1.中火蒸10.5min\n2.炒肉末3.5min铺面\n3.淋油闷1.5min上桌" },
-        { name: "小炒黄牛肉", isKid: false, ing: "嫩牛200g,尖椒5个,芹菜50g", sauce: "蚝油20ml,生粉3g,油15ml", prep: "逆纹切薄片油腌20.5min", step: "1.最高温猛划35s出锅\n2.炒辣入牛合炒20.5s" },
-        { name: "番茄牛腩", isKid: true, ing: "牛腩500g,番茄3,土豆1", sauce: "冰糖5粒,盐5.5g,番茄酱30ml", prep: "腩焯水3.5cm块,土豆2.5cm块", step: "1.焖炖65min\n2.入薯番茄炖20.5min" },
-        { name: "清蒸鲈鱼", isKid: true, ing: "鲈鱼550g,葱丝30g,老姜30g", sauce: "豉油50ml,植物油35ml", prep: "划口腌6min,葱丝泡卷", step: "1.大火蒸8.5min闷1.5min\n2.换葱泼200度油激香" },
-        { name: "糖醋里脊", isKid: false, ing: "里脊250g,蛋清1,芝麻5g", sauce: "茄酱60ml,醋15ml,糖30g", prep: "1cm条腌15min炸5.5min", step: "1.酱汁起大泡入肉裹浆10s\n2.撒芝麻立刻装盘" },
-        { name: "滑蛋牛柳", isKid: true, ing: "牛肉100g,蛋3个", sauce: "盐2g,生粉,油", prep: "牛浆腌20min,蛋加盐打散", step: "1.滑牛30s盛出\n2.倒蛋微凝入牛推30s关火" },
-        { name: "手撕包菜", isKid: false, ing: "包菜300g,五花肉60g", sauce: "陈醋3勺,生抽,盐3.5g", prep: "手撕片,肉切极薄", step: "1.煸肉爆椒最大火炒2.5min\n2.淋醋合味快炒30s" },
-        { name: "麻婆豆腐", isKid: false, ing: "豆腐400g,肉末60g,豆瓣1勺", sauce: "椒粉3g,盐2g,生粉5g", prep: "方块盐水泡5min", step: "1.炒酱入水300ml焖6.5min\n2.三次勾芡撒厚椒粉" },
-        { name: "五彩玉米粒", isKid: true, ing: "玉米150,丁50,豆50", sauce: "盐2.5g,糖4g", prep: "丁焯沸水3.5min彻底断生", step: "1.热油炒2.5min调味勾芡\n2.猛炒30s晶莹透亮" },
-        { name: "萝卜丝汤", isKid: true, ing: "萝卜250g,蛋1,枸杞", sauce: "盐2g,白胡椒0.5g", prep: "切细丝,煎1个老荷包蛋", step: "1.炒丝3min入500ml热水蛋\n2.大火煮6.5min汤奶白" },
-        { name: "腊肉萝卜干", isKid: false, ing: "腊肉100g,萝卜干80g", sauce: "小米辣,豆豉,生抽", prep: "萝卜干泡挤干,腊肉煮15min", step: "1.煸腊肉爆椒入萝卜干\n2.大火猛炒4.5min" },
-        { name: "湘味炒豆腐", isKid: false, ing: "豆腐1,肉末50,蒜苗", sauce: "生抽2,蚝油,开水", prep: "豆腐煎金黄8.5min", step: "1.炒末入豆腐焖4.5min\n2.入蒜苗炒匀30s" },
-        { name: "宫保鸡丁", isKid: false, ing: "鸡丁200,花生30,辣椒葱", sauce: "糖3,醋3,酱1,淀粉", prep: "浆腌15min,调好灵魂碗汁", step: "1.滑肉盛爆椒合肉泼汁\n2.转圈翻45s挂亮芡" },
-        { name: "水煮肉片", isKid: false, ing: "里脊250,菜150,蒜泥", sauce: "豆瓣1,辣粉,滚油30ml", prep: "浆腌20min,菜烫熟垫底", step: "1.滑肉1.5min变色码蒜\n2.泼冒白烟滚油" },
-        { name: "红烧肉", isKid: false, ing: "三层肉500,冰糖12,黄酒", sauce: "老抽15,生抽35,热水", prep: "3cm方煸油盛出糖色", step: "1.回肉挂色炖55min\n2.猛火收干发亮" },
-        { name: "土豆泥肉末", isKid: true, ing: "土豆300,肉末100,蚝油", sauce: "生抽,老抽少,黑椒1g", prep: "蒸泥18min,肉腌5min", step: "1.炒末4.5min调汁焖2min\n2.勾浓芡淋在泥顶" },
-        { name: "肉末茄子", isKid: true, ing: "紫茄2,肉末60,蚝油", sauce: "生抽1,糖5g,生粉", prep: "蒸茄10.5min至极软", step: "1.炒末入茄合炒焖2.5min\n2.收汁撒葱出锅" },
-        { name: "菠萝咕噜肉", isKid: true, ing: "里脊200,菠萝80,蛋清", sauce: "茄酱60,醋1,糖2", prep: "挂粉炸2次,菠萝泡盐水", step: "1.中火汁起泡入肉翻8s\n2.全挂浆保持脆感" },
-        { name: "蒜蓉西兰花", isKid: true, ing: "菜350,大蒜5,枸杞", sauce: "盐2.5,鸡精,粉水", prep: "焯2.5min,蒜压泥", step: "1.炒蒜25s入菜炒60s\n2.淋薄芡合匀装盘" },
-        { name: "干炒牛河", isKid: false, ing: "牛里脊,河粉,芽菜", sauce: "生抽2,老抽半,盐1.5g", prep: "腌20min,热锅冒大烟", step: "1.滑牛变色即捞炒粉菜\n2.最大火颠炒入牛炒匀" },
-        { name: "脆皮豆腐", isKid: true, ing: "老豆腐1,蛋1,粉", sauce: "茄酱2,砂糖10g", prep: "裹粉蛋煎金黄", step: "1.汁煮浓下豆腐滚10s\n2.外酥内嫩酸甜" },
-        { name: "剁椒蒸翅", isKid: false, ing: "翅8,剁椒2勺,蒜末", sauce: "料酒1,生抽,葱花", prep: "背切腌10min铺厚椒", step: "1.大火蒸15.5min\n2.倒水撒葱泼热油" },
-        { name: "清蒸鱼头", isKid: true, ing: "鱼头1,姜葱,豉油3", sauce: "豉油,热油,胡椒", prep: "劈开腌15min铺姜葱", step: "1.蒸12min泼200度油" },
-        { name: "葱爆牛肉", isKid: false, ing: "脊200g,葱2,姜", sauce: "蚝1,酱1.5,糖2", prep: "浆腌15min,葱切滚刀", step: "1.猛火滑35s出炒葱\n2.回牛炒25s即成" },
-        { name: "酱爆鸡丁", isKid: true, ing: "鸡丁200,土豆,面酱", sauce: "白糖15g,生粉少", prep: "浆腌,土豆炸熟透", step: "1.炒香面酱入鸡丁土豆\n2.大火合匀挂全酱" }
+        { 
+            name: "虾仁滑蛋", isKid: true, 
+            ing: "冷冻/鲜虾仁150g(约12只)、大鸡蛋3个、小葱1根", 
+            sauce: "食盐2.5g(1/4勺)、白胡椒粉0.5g、生粉5g+水15ml", 
+            prep: "1.虾仁去线洗净擦干,加1g盐腌制10min\n2.蛋液加生粉水、1g盐、葱花,筷子打30下至匀", 
+            step: "1.热锅加油,虾仁大火滑炒45s变红立刻盛出\n2.洗锅加油烧热,下蛋液,中火静置10s\n3.蛋液半凝固入虾仁,用铲向心推20s呈流心状立即关火" 
+        },
+        { 
+            name: "可乐鸡翅", isKid: false, 
+            ing: "翅中8只、可乐330ml(1听)、老姜5厚片", 
+            sauce: "生抽30ml(2勺)、老抽5ml(少许)、食盐1.5g", 
+            prep: "1.鸡翅双面各划2刀深度见骨\n2.冷水下锅加姜2片,煮沸2min撇沫捞出,温水洗净擦干", 
+            step: "1.不放油中火下鸡翅,每面煎4min至金黄冒油\n2.放姜片生抽老抽,倒入可乐,大火煮沸改小火\n3.焖煮12.5min,开最大火猛转收汁3min至挂浆" 
+        },
+        { 
+            name: "酸辣土豆丝", isKid: false, 
+            ing: "大土豆1个(300g)、青椒半个、干红椒3个、花椒10粒", 
+            sauce: "白醋30ml(2勺)、陈醋15ml(1勺)、食盐3.5g、糖2g", 
+            prep: "1.土豆切0.2cm匀称细丝,冷水反复洗3遍去淀粉\n2.土豆丝浸泡在凉水中10min保持脆感,控干备用", 
+            step: "1.热锅热油爆香花椒干椒,下土豆丝开最大火\n2.猛火翻炒95s至变透明,下青椒和盐糖\n3.沿锅边泼入混合醋汁,利用火气猛炒30s即刻出锅" 
+        },
+        { 
+            name: "农家小炒肉", isKid: false, 
+            ing: "猪前腿肉250g(肥瘦开切)、螺丝椒4个、豆豉20粒", 
+            sauce: "生抽30ml、老抽少许(5ml)、料酒1勺、大蒜5瓣片", 
+            prep: "1.辣椒去籽斜切,干锅下辣椒中火煸炒5.5min出虎皮\n2.肉切0.2cm薄片,瘦肉加半勺生抽腌5min", 
+            step: "1.肥肉煸出猪油微焦,入瘦肉炒散25s变白\n2.入蒜片豆豉爆香,入辣椒合炒,淋生抽老抽\n3.开启最大火猛力颠炒45s带出火气起锅" 
+        },
+        { 
+            name: "红烧排骨", isKid: false, 
+            ing: "肋排500g、冰糖10颗、八角2个、老姜5片", 
+            sauce: "生抽30ml、老抽7ml、料酒15ml、开水足量", 
+            prep: "1.肋排冷水入锅煮沸3min去血沫,捞出洗净控干\n2.少油下冰糖,极小火慢熬3.5min至红褐色冒泡", 
+            step: "1.排骨入锅大火炒1min挂糖色,加姜葱八角酱油\n2.热水淹没排骨,小火稳炖45min\n3.挑出香料,大火猛收汁5.5min至粘稠红亮" 
+        },
+        { 
+            name: "肉末蒸蛋", isKid: true, 
+            ing: "鸡蛋2个(约110g)、猪肉末65g(3肥7瘦)、葱花少许", 
+            sauce: "生抽1.5勺、芝麻香油15ml、食盐1.5g、温水200ml", 
+            prep: "1.蛋液与温水1:1.5混合,加盐搅匀过筛2遍去泡\n2.肉末加少许生抽腌制5min", 
+            step: "1.蛋液盖膜扎孔,水开入锅中火蒸10.5min\n2.热锅炒熟肉末3.5min至酥香铺在蛋面\n3.淋生抽香油,继续闷蒸1.5min即刻上桌" 
+        },
+        { 
+            name: "小炒黄牛肉", isKid: false, 
+            ing: "嫩牛肉200g、小米辣5个、芹菜/香菜50g、大蒜", 
+            sauce: "蚝油20ml、生粉3g、食用油15ml腌制、生抽10ml", 
+            prep: "1.牛肉逆纹切极薄片,加粉酱油油抓匀腌20min\n2.小米辣、大蒜切碎,芹菜切3cm段", 
+            step: "1.锅烧红冒白烟,牛肉下锅大火猛划35s变色速捞\n2.余油炒香辣蒜末,回锅牛肉和芹菜段\n3.加盐、蚝油,最高火力快炒20s极速出锅" 
+        },
+        { 
+            name: "清蒸鲈鱼", isKid: true, 
+            ing: "鲈鱼1条(550g)、葱丝30g、老姜30g、料酒15ml", 
+            sauce: "蒸鱼豉油50ml、植物油35ml(烧至冒青烟)", 
+            prep: "1.鱼背深划2刀,肚塞姜葱,抹薄盐腌制6min\n2.大葱白切细丝浸泡冷水使其卷曲备用", 
+            step: "1.水大滚入鱼,大火蒸8.5min,关火闷1.5min\n2.倒掉盘中黑腥水,换新鲜葱丝淋入豉油\n3.热油烧至冒烟淋葱丝激香,大功告成" 
+        },
+        { 
+            name: "番茄牛腩", isKid: true, 
+            ing: "牛腩500g、大番茄3只(去皮)、土豆1个(200g)", 
+            sauce: "冰糖5粒、食盐5.5g、番茄酱30ml、生抽10ml", 
+            prep: "1.牛腩冷水焯水洗净切3.5cm块;番茄去皮切块\n2.土豆切2.5cm方块,冷水泡掉淀粉", 
+            step: "1.牛腩炒香,加1/2番茄炒出红油入热水\n2.小火稳炖65min,下土豆及余番茄和盐\n3.继续炖20.5min,大火略收汁至汤头浓郁" 
+        },
+        { 
+            name: "糖醋里脊", isKid: false, 
+            ing: "猪里脊250g、大鸡蛋清1个、熟白芝麻5g", 
+            sauce: "番茄酱60ml、白醋15ml、砂糖30g、清水55ml", 
+            prep: "1.里脊切条加盐、生粉、蛋清抓匀浆腌15.5min\n2.油温6成炸里脊5.5min,捞出大火复炸45s酥脆", 
+            step: "1.底油中火熬酱汁至起大密泡,入里脊条\n2.快速翻动10.5s挂全浆,撒芝麻立刻出锅" 
+        },
+        { 
+            name: "五彩玉米粒", isKid: true, 
+            ing: "甜玉米150g,胡萝卜50g,绿豌豆50g", 
+            sauce: "食盐2.5g(半勺),白糖4g,水淀粉1勺", 
+            prep: "1.胡萝卜豆切丁入沸水焯烫3.5min彻底断生\n2.玉米粒控干水分备用", 
+            step: "1.大火热油倒所有菜丁,快速翻炒2.5min\n2.加入盐糖淋入水淀粉增加亮度\n3.大火猛炒30s见晶莹透亮即成" 
+        },
+        { 
+            name: "麻婆豆腐", isKid: false, 
+            ing: "嫩豆腐1块(400g),猪肉末60g,郫县豆瓣1大勺", 
+            sauce: "花椒粉3g,精盐2g,生粉5g+水30ml", 
+            prep: "1.豆腐切2cm方块盐水泡5min去豆腥\n2.肉末加少许料酒腌制5min", 
+            step: "1.炒肉末酱出红油入温水300ml 2.入豆腐焖煮6.5min 3.分三次勾芡收浓撒厚花椒粉" 
+        },
+        { 
+            name: "手撕包菜", isKid: false, 
+            ing: "圆包菜半颗(300g),五花肉片60g,干红椒3个", 
+            sauce: "陈醋3勺(沿锅边),生抽1勺,食盐3.5g", 
+            prep: "1.包菜纯手工撕大片充分沥干,肉切透薄片", 
+            step: "1.肉片煸油爆椒 2.最高火炒包菜2.5min断生 3.淋醋合调料猛翻30s出锅" 
+        },
+        { 
+            name: "萝卜丝汤", isKid: true, 
+            ing: "白萝卜半根(250g),大鸡蛋1个,枸杞5粒", 
+            sauce: "精盐2g,白胡椒粉0.5g,葱花少许", 
+            prep: "1.萝卜切均匀细丝;底油先煎好1个焦荷包蛋切块", 
+            step: "1.炒软萝卜丝3min入500ml热开水 2.放蛋块大火沸煮6.5min至汤白 3.撒盐起锅" 
+        },
+        { 
+            name: "腊肉萝卜干", isKid: false, 
+            ing: "湘味腊肉100g,干萝卜条80g,小米辣3个", 
+            sauce: "豆豉少许,生抽1勺,白糖1.5g", 
+            prep: "1.萝卜干泡发挤干;腊肉冷水煮15min切薄片", 
+            step: "1.腊肉煸油至透明放姜蒜椒 2.入萝卜干大火猛炒4.5min 3.提鲜翻匀起锅" 
+        },
+        { 
+            name: "宫保鸡丁", isKid: false, 
+            ing: "鸡腿丁200g,熟花生米30g,辣椒段葱段", 
+            sauce: "陈醋3勺,砂糖3勺,生抽15ml,生粉1勺", 
+            prep: "1.鸡丁浆腌15min;调匀黄金酸甜比例碗汁", 
+            step: "1.滑熟肉丁盛出爆辣 2.回肉泼汁大火转圈翻45s 3.挂亮芡亮油即成" 
+        },
+        { 
+            name: "水煮肉片", isKid: false, 
+            ing: "猪里脊250g,青菜/豆芽150g,蒜泥1勺", 
+            sauce: "豆瓣酱1勺,辣椒粉5g,滚油30ml", 
+            prep: "1.肉片加蛋清浆腌20min;蔬菜提前烫熟垫碗底", 
+            step: "1.煮沸汤底滑入肉片1.5min变色盛出 2.码蒜泼冒烟滚油炸响" 
+        },
+        { 
+            name: "红烧肉", isKid: false, 
+            ing: "五花三层500g,冰糖12颗,黄酒30ml", 
+            sauce: "老抽15ml,生抽35ml,热水足量", 
+            prep: "1.肉切3cm方焯洗;锅内煸出油脂盛出", 
+            step: "1.炒糖色回肉挂匀 2.加热水小火稳炖55.5min 3.大火猛收浓汁发亮" 
+        },
+        { 
+            name: "土豆泥肉末", isKid: true, 
+            ing: "中等土豆2个(300g),猪肉末100g,蚝油1勺", 
+            sauce: "生抽1勺,老抽少许,黑胡椒粉1g", 
+            prep: "1.土豆蒸18min压顺滑泥;肉末腌制5min", 
+            step: "1.热锅炒肉末4.5min入酱汁煮沸 2.改小火焖2min勾浓芡 3.肉酱匀淋泥山顶" 
+        },
+        { 
+            name: "肉末茄子", isKid: true, 
+            ing: "长紫茄子2根,猪肉末60g,蚝油1勺", 
+            sauce: "生抽1勺,砂糖5g,生粉少许", 
+            prep: "1.茄子切条蒸10.5min至极软;调好料汁", 
+            step: "1.油炒肉末入茄子 2.倒入料汁合炒焖煮2.5min 3.大火收汁撒葱花" 
+        },
+        { 
+            name: "菠萝咕噜肉", isKid: true, 
+            ing: "猪里脊200g,菠萝80g,大鸡蛋清1个", 
+            sauce: "番茄酱60ml,白醋1勺,白糖2勺,清水50ml", 
+            prep: "1.肉切2cm方挂粉糊炸2次酥脆;菠萝泡盐水", 
+            step: "1.中火煮浓酱汁入肉菠萝 2.颠锅8s全挂浆保持脆感" 
+        },
+        { 
+            name: "滑蛋牛柳", isKid: true, 
+            ing: "嫩牛肉100g,大鸡蛋3个,玉米生粉1勺", 
+            sauce: "精盐2g,食用油15ml浆腌", 
+            prep: "1.牛逆纹切极薄丝浆腌20min;蛋液加盐打散", 
+            step: "1.滑熟牛肉30s速盛 2.倒蛋液微凝入肉 3.推铲30s呈果冻流心状" 
+        },
+        { 
+            name: "蒜蓉西兰花", isKid: true, 
+            ing: "西兰花350g,大蒜泥5瓣量,枸杞子少许", 
+            sauce: "食盐2.5g,鸡精1g,淀粉水1勺", 
+            prep: "1.掰小朵泡盐水焯2.5min捞出;大蒜压泥", 
+            step: "1.中火炒蒜泥25s出香金黄 2.最大火炒菜60s 3.淋薄芡合匀装盘" 
+        },
+        { 
+            name: "干炒牛河", isKid: false, 
+            ing: "牛里脊100g,河粉300g,绿豆芽菜100g", 
+            sauce: "生抽2勺,老抽半勺,精盐1.5g", 
+            prep: "1.牛片腌20min;大火烧热空锅至冒大白烟", 
+            step: "1.滑牛变色即捞炒粉菜 2.最大火颠锅入牛炒匀全过程3min" 
+        },
+        { 
+            name: "脆皮豆腐", isKid: true, 
+            ing: "老豆腐1块,鸡蛋1个,玉米生粉足量", 
+            sauce: "番茄酱2勺,砂糖10g,白醋少许", 
+            prep: "1.方块裹粉及蛋液小火煎四面金黄", 
+            step: "1.调好酸甜汁入锅煮浓 2.下豆腐快速滚动10.5s挂全浆 3.外酥内嫩" 
+        },
+        { 
+            name: "鱼香茄子", isKid: false, 
+            ing: "紫茄子2根,猪肉末50g,泡椒末1勺", 
+            sauce: "糖2醋2盐1平勺,淀粉1勺,清水50ml", 
+            prep: "1.茄切条炸软控油;调灵魂鱼香配比汁", 
+            step: "1.炒香肉末泡椒入茄 2.大火猛力翻炒收浓汁 3.下饭绝了" 
+        },
+        { 
+            name: "剁椒蒸翅", isKid: false, 
+            ing: "鸡翅中8只,红剁辣椒2大勺,蒜末1大勺", 
+            sauce: "料酒1勺,生抽10ml,白砂糖1g", 
+            prep: "1.背切2刀腌10min,表面均匀铺厚剁椒蒜泥", 
+            step: "1.满汽大火蒸15.5min 2.倒掉1/2余水撒葱 3.泼极热油激发辣香" 
+        },
+        { 
+            name: "清蒸鱼头", isKid: true, 
+            ing: "大鱼头1个,姜葱片30g,白胡椒粉少许", 
+            sauce: "蒸鱼豉油3勺,植物热油30ml", 
+            prep: "1.鱼头劈开洗净,抹盐姜腌15min铺姜葱", 
+            step: "1.大火足汽蒸12min 2.倒腥水换新葱淋豉油 3.泼200度热油激香" 
+        },
+        { 
+            name: "葱爆牛肉", isKid: false, 
+            ing: "牛脊肉200g,大葱白2根,老姜丝少许", 
+            sauce: "蚝油1勺,生抽1.5勺,砂糖2g,生粉", 
+            prep: "1.逆纹薄片加粉浆腌15.5min;葱斜切滚刀块", 
+            step: "1.猛火滑牛肉35.5s即盛 2.底油炒葱至微软回牛肉 3.大火猛炒25s即成" 
+        },
+        { 
+            name: "酱爆鸡丁", isKid: true, 
+            ing: "鸡胸肉200g,土豆丁100g,甜面酱1大勺", 
+            sauce: "白糖15g,玉米生粉少许", 
+            prep: "1.鸡丁浆腌15min;土豆丁提前油炸至金黄熟透", 
+            step: "1.小火炒香酱糖 2.入鸡丁合匀炒熟 3.入土豆大火挂全酱" 
+        }
     ];
 
+    // Fisher-Yates 洗牌
     function shuffle(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
     const recipes = shuffle(recipesRaw), count = recipes.length, arc = (Math.PI * 2) / count;
 
     function draw() {
         ctx.save(); ctx.translate(400, 400); ctx.rotate(-Math.PI / 2); ctx.translate(-400, -400);
         for (let i = 0; i < count; i++) {
-            const angle = i * arc;
-            ctx.beginPath();
+            const angle = i * arc; ctx.beginPath();
             ctx.fillStyle = (i % 2 === 0) ? "rgba(255, 215, 0, 0.3)" : "rgba(255, 250, 205, 0.3)"; 
             ctx.moveTo(400, 400); ctx.arc(400, 400, 390, angle, angle + arc); ctx.fill();
             ctx.save(); ctx.translate(400, 400); ctx.rotate(angle + arc / 2);
-            ctx.fillStyle = recipes[i].isKid ? "#28a745" : "#332200"; 
-            ctx.font = "bold 19px Arial";
+            ctx.fillStyle = recipes[i].isKid ? "#28a745" : "#332200"; ctx.font = "bold 19px Arial";
             ctx.textAlign = "right"; ctx.fillText(recipes[i].name, 375, 6); ctx.restore();
-        }
-        ctx.restore();
+        } ctx.restore();
     }
 
     function startSpin() {
-        if (isSpinning) return;
-        isSpinning = true;
-        const totalSpin = 3600 + Math.floor(Math.random() * 360);
-        currentDeg += totalSpin;
-        document.getElementById('wheel').style.transform = `rotate(${currentDeg}deg)`;
-        
+        if (isSpinning) return; isSpinning = true;
+        const totalSpin = 3600 + Math.floor(Math.random() * 360); currentTotalDeg += totalSpin;
+        document.getElementById('wheel').style.transform = `rotate(${currentTotalDeg}deg)`;
         setTimeout(() => {
             isSpinning = false;
-            const normalizedDeg = (currentDeg % 360);
-            const index = Math.floor((360 - normalizedDeg) / (360 / count)) % count;
-            lastWinnerIdx = index;
-            showRecipe(index, true);
+            const index = Math.floor((360 - (currentTotalDeg % 360)) / (360 / count)) % count;
+            lastWinnerIdx = index; showRecipe(index, true);
         }, 4100);
     }
 
     function showRecipe(idx, isNew) {
         const r = recipes[idx];
         document.getElementById('rTitle').innerHTML = r.name + (r.isKid ? '<span class="kid-tag">萌娃餐</span>' : '');
-        document.getElementById('rIng').innerText = r.ing; 
-        document.getElementById('rSauce').innerText = r.sauce;
-        document.getElementById('rPrep').innerText = r.prep; 
-        document.getElementById('rStep').innerText = r.step;
+        document.getElementById('rIng').innerText = r.ing; document.getElementById('rSauce').innerText = r.sauce;
+        document.getElementById('rPrep').innerText = r.prep; document.getElementById('rStep').innerText = r.step;
         document.getElementById('swapBtn').style.display = isNew ? "block" : "none";
-        document.getElementById('recipeCard').style.display = 'block'; 
-        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('recipeCard').style.display = 'block'; document.getElementById('overlay').style.display = 'block';
     }
 
     function confirmRecipe() {
-        // 瞬间触发入口按钮，不等待动画
         document.getElementById('historyBtn').style.display = "inline-block";
         createStars();
-        setTimeout(() => {
-            document.getElementById('recipeCard').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
-        }, 800);
+        setTimeout(() => { document.getElementById('recipeCard').style.display = 'none'; document.getElementById('overlay').style.display = 'none'; }, 800);
     }
 
     function reviewLast() { if (lastWinnerIdx !== -1) showRecipe(lastWinnerIdx, false); }
@@ -200,10 +364,8 @@
         const container = document.getElementById('star-container');
         for (let i = 0; i < 120; i++) {
             const star = document.createElement('div'); star.className = 'star'; star.innerText = '★';
-            star.style.left = Math.random() * 100 + 'vw';
-            star.style.animationDuration = (Math.random() * 3 + 4) + 's';
-            star.style.fontSize = (Math.random() * 15 + 12) + 'px';
-            container.appendChild(star);
+            star.style.left = Math.random() * 100 + 'vw'; star.style.animationDuration = (Math.random() * 3 + 4) + 's';
+            star.style.fontSize = (Math.random() * 15 + 12) + 'px'; container.appendChild(star);
             setTimeout(() => star.remove(), 7000);
         }
     }
