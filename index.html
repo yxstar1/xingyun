@@ -126,8 +126,8 @@
 </div>
 
 <div class="controls">
-    <button class="spin-btn" onclick="startSpin()">开启Friday奇迹</button>
-    <button class="history-btn" id="historyBtn" onclick="reviewLast()">回顾上次奇迹</button>
+    <button class="spin-btn" onclick="startSpin()">替我选择</button>
+    <button class="history-btn" id="historyBtn" onclick="reviewLast()">回顾上次</button>
 </div>
 
 <div class="footer">Made for You by 你的专属饲养员</div>
@@ -137,7 +137,7 @@
     const ctx = canvas.getContext('2d');
     
     // 背景图片配置：请确保你的文件夹里有这些命名的图片
-    const backgroundList = ["bg1.jpg", "bg2.jpg", "bg3.jpg", "bg4.jpg", "bg5.jpg"];
+    const backgroundList = ["bg1.jpg", "bg2.jpeg", "bg3.jpg", "bg4.jpg", "bg5.jpg"];
 
     const recipesRaw = [
         { name: "虾仁滑蛋", isKid: true, ing: "新鲜虾仁150g、鸡蛋3个、小葱1根", sauce: "盐2g、白胡椒0.5g、水淀粉1勺", prep: "虾仁去线洗净，加1g盐腌制5分钟；蛋液加水淀粉和1g盐搅匀", step: "1.热油滑炒虾仁45秒变色盛出\n2.中火倒蛋液微凝固入虾仁\n3.铲子推25秒流心状立刻关火出锅" },
